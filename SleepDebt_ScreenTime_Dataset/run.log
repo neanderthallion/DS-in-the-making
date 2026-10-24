@@ -1,0 +1,87 @@
+Loaded 8500 rows, 18 columns; no nulls or duplicates.
+
+============================================================ 
+1. DOOMSCROLL PENALTY
+ ============================================================
+REM minutes        simple    per 30 min: -7.527 (95% CI -7.824, -7.230) p=0  R2=0.225
+REM minutes        adjusted  per 30 min: -7.641 (95% CI -7.856, -7.427) p=0  R2=0.597
+REM % of sleep     simple    per 30 min: -0.018 (95% CI -0.062, +0.026) p=0.43  R2=0.000
+REM % of sleep     adjusted  per 30 min: -0.014 (95% CI -0.052, +0.023) p=0.452  R2=0.269
+Total sleep hours  simple    per 30 min: -0.651 (95% CI -0.672, -0.631) p=0  R2=0.307
+Total sleep hours  adjusted  per 30 min: -0.662 (95% CI -0.676, -0.649) p=0  R2=0.700
+
+============================================================ 
+2. MITIGATION EFFICACY
+ ============================================================
+Brightness >= 90%: filter off n=196 mean=4.62; on n=194 mean=4.02
+Diff (on-off)=-0.600, bootstrap 95% CI [-1.174 -0.02 ], Welch p=0.0457, Mann-Whitney p=0.0335, Cohen d=-0.20
+======================================================================================================================
+                                                         coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------------------------------------------
+Intercept                                              0.1895      0.097      1.963      0.050       0.000       0.379
+C(primary_bedtime_app)[T.Messaging / Chat]            -0.2848      0.078     -3.644      0.000      -0.438      -0.132
+C(primary_bedtime_app)[T.News / Reading]              -0.5902      0.088     -6.684      0.000      -0.763      -0.417
+C(primary_bedtime_app)[T.Streaming (Netflix/Hulu)]    -0.3141      0.069     -4.575      0.000      -0.449      -0.180
+C(primary_bedtime_app)[T.TikTok / Reels]               0.2687      0.060      4.456      0.000       0.150       0.387
+C(primary_bedtime_app)[T.YouTube]                     -0.1030      0.062     -1.659      0.097      -0.225       0.019
+screen_brightness_pct                                  0.0148      0.001     10.710      0.000       0.012       0.018
+blue_light_filter_active                              -0.1625      0.119     -1.371      0.170      -0.395       0.070
+screen_brightness_pct:blue_light_filter_active        -0.0047      0.002     -2.311      0.021      -0.009      -0.001
+bedtime_phone_minutes                                  0.0516      0.001     95.114      0.000       0.051       0.053
+======================================================================================================================
+Predicted fatigue @100% + filter: 3.94 | @100% no filter: 4.57 | @10% no filter: 3.24
+Filter does NOT fully offset the 100%-brightness penalty (still above low-brightness baseline)
+
+Chi-square filter x sleep_debt_category: chi2=27.94, dof=3, p=3.74e-06, Cramer's V=0.057
+
+============================================================ 
+3. PREDICTIVE MODELING (behavioral features)
+ ============================================================
+Random Forest best CV RMSE=1.2008 params={'min_samples_leaf': 3, 'max_features': 0.5}
+XGBoost best CV RMSE=1.1623 params={'subsample': 0.7, 'reg_lambda': 1, 'n_estimators': 900, 'min_child_weight': 5, 'max_depth': 3, 'learning_rate': 0.02, 'colsample_bytree': 1.0}
+
+5-fold CV on training set (re-scored, tuned params):
+  Mean baseline      R2=-0.000�0.000  RMSE=2.673
+  Linear regression  R2=0.787�0.011  RMSE=1.232
+  Random Forest      R2=0.798�0.012  RMSE=1.201
+  XGBoost            R2=0.811�0.011  RMSE=1.162
+
+Hold-out test set (predictions clipped to [1, 10]):
+            model  CV_RMSE      R2   RMSE    MAE
+    Mean baseline   2.6732 -0.0011 2.7314 2.2846
+Linear regression   1.2321  0.8194 1.1601 0.8676
+    Random Forest   1.2008  0.8150 1.1740 0.8862
+          XGBoost   1.1623  0.8305 1.1240 0.8381
+
+Selected model (lowest CV RMSE): XGBoost
+
+Residual bias / RMSE by score bin:
+                                 bias                  rmse        
+model                  Random Forest XGBoost Random Forest XGBoost
+binned_by bin                                                     
+actual    (0.0, 2.0]          -0.558  -0.529         0.851   0.846
+          (2.0, 4.0]          -0.143  -0.154         1.126   1.073
+          (4.0, 6.0]           0.371   0.343         1.339   1.295
+          (6.0, 8.0]           0.647   0.597         1.433   1.397
+          (8.0, 10.01]         1.117   0.868         1.501   1.334
+predicted (0.0, 2.0]          -0.026   0.010         0.688   0.671
+          (2.0, 4.0]           0.041  -0.045         1.317   1.266
+          (4.0, 6.0]          -0.024  -0.006         1.405   1.336
+          (6.0, 8.0]           0.222   0.135         1.451   1.392
+          (8.0, 10.01]         0.174   0.056         0.964   0.853
+
+Permutation importance (XGBoost, test):
+                  feature  importance    std
+   bedtime_phone_minutes      1.0569 0.0369
+              chronotype      0.3492 0.0120
+         occupation_type      0.1129 0.0078
+    caffeine_post_5pm_mg      0.0828 0.0024
+   screen_brightness_pct      0.0224 0.0021
+     primary_bedtime_app      0.0217 0.0016
+blue_light_filter_active      0.0091 0.0012
+   physical_activity_min      0.0004 0.0006
+                  gender     -0.0000 0.0002
+                     age     -0.0009 0.0004
+
+Exported results.csv (1700 rows, model=XGBoost), outputs/feature_importance.csv, outputs/metrics.csv, outputs/residual_by_bin.csv, 3 figures.
+Note: data is simulated/cross-sectional (associations, not causal); fatigue is capped at 10.

@@ -1,0 +1,17 @@
+## The Bedtime Addiction: Sleep Debt & Screen Time
+# Context & Business Problem
+Modern sleep architecture is severely disrupted by late-night digital consumption. Dopaminergic hyper-arousal from short-form video (TikTok, Reels) and melatonin suppression from unmitigated blue light exposure directly compound into chronic sleep debt and elevated next-day fatigue.
+
+This dataset provides cross-sectional lifestyle telemetry for 8,500 individuals, mapping their evening tech habits, caffeine intake, and demographic chronotypes against physiological sleep metrics and resulting fatigue scores.
+
+# Data Engineering & Biophysical Logic
+This dataset is generated via a simulation grounded in standard biophysical scaling:
+
+Melatonin Suppression: Scales with screen brightness and minutes, mitigated non-linearly by blue-light filter usage.
+Arousal Weights: App genres carry distinct cognitive arousal weights (e.g., short-form algorithmic video induces higher neuro-arousal than e-reading).
+Target Variables: Features a continuous target (next_day_fatigue_score) for regression and a multi-class categorical target (sleep_debt_category) for classification.
+
+# Starter Research Questions
+1. The Doomscroll Penalty: Can you quantify the exact reduction in REM sleep per 30 minutes of bedtime scrolling?
+2. Mitigation Efficacy: Does activating a blue-light filter mathematically offset the fatigue penalty of 100% screen brightness?
+3. Predictive Modeling: Train an XGBoost or Random Forest regressor to predict next_day_fatigue_score based strictly on behavioral features (caffeine, app choice, screen time) rather than physiological outputs.

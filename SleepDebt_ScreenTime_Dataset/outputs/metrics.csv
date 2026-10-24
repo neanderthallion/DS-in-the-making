@@ -1,0 +1,5 @@
+model,CV_RMSE,R2,RMSE,MAE
+Mean baseline,2.6732,-0.0011,2.7314,2.2846
+Linear regression,1.2321,0.8194,1.1601,0.8676
+Random Forest,1.2008,0.815,1.174,0.8862
+XGBoost,1.1623,0.8305,1.124,0.8381
